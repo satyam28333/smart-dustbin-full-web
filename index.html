@@ -47,7 +47,6 @@
   </style>
 </head>
 <body>
-  <!-- Login Page -->
   <div id="loginPage" class="login-container">
     <div class="login-box">
       <h2>🏛️ Municipal Corp</h2>
@@ -59,7 +58,6 @@
     </div>
   </div>
 
-  <!-- Dashboard -->
   <div id="dashboard" class="dashboard">
     <div class="sidebar">
       <div class="logo">🏛️ Smart Corp</div>
@@ -73,59 +71,33 @@
     </div>
     <div class="main-content">
       <div class="top-bar"><h1>Smart Dustbin Dashboard</h1><button class="logout-btn" onclick="logout()">🚪 Logout</button></div>
-      
-      <!-- Overview Section -->
       <div id="overviewSection">
         <div class="stats-grid" id="statsGrid"></div>
         <div class="panel"><h3>📍 Dustbin Locations</h3><div id="map" class="map-container"></div></div>
       </div>
-
-      <!-- Bins Table Section -->
-      <div id="binsSection" style="display:none;">
-        <div class="panel"><h3>🗑️ All Dustbins</h3>
-          <table>
-            <thead><tr><th>ID</th><th>Location</th><th>Fill %</th><th>Status</th><th>Waste</th><th>Last Update</th><th>Actions</th></tr></thead>
-            <tbody id="binsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Alerts Section -->
-      <div id="alertsSection" style="display:none;">
-        <div class="panel"><h3>⚠️ Alerts</h3><div class="alerts-list" id="alertsList"></div></div>
-      </div>
-
-      <!-- Analytics Section -->
-      <div id="analyticsSection" style="display:none;">
-        <div class="panel"><h3>📈 Fill Levels</h3><div class="chart-container"><canvas id="fillChart"></canvas></div></div>
-        <div class="panel"><h3>💧 Wet vs 🍂 Dry</h3><div class="chart-container"><canvas id="wasteTypeChart"></canvas></div></div>
-      </div>
-
-      <!-- Admin Section -->
+      <div id="binsSection" style="display:none;"><div class="panel"><h3>🗑️ All Dustbins</h3><table><thead><tr><th>ID</th><th>Location</th><th>Fill %</th><th>Status</th><th>Waste</th><th>Last Update</th><th>Actions</th></tr></thead><tbody id="binsTableBody"></tbody></table></div></div>
+      <div id="alertsSection" style="display:none;"><div class="panel"><h3>⚠️ Alerts</h3><div class="alerts-list" id="alertsList"></div></div></div>
+      <div id="analyticsSection" style="display:none;"><div class="panel"><h3>📈 Fill Levels</h3><div class="chart-container"><canvas id="fillChart"></canvas></div></div><div class="panel"><h3>💧 Wet vs 🍂 Dry</h3><div class="chart-container"><canvas id="wasteTypeChart"></canvas></div></div></div>
       <div id="adminSection" style="display:none;">
         <div class="panel">
           <h3>⚙️ Add Dustbin</h3>
           <form id="addBinForm">
-            <input type="text" id="newBinId" placeholder="Bin ID (e.g., TEST01)" required style="padding:10px;margin:5px;background:#0f172a;border:1px solid #334155;color:white;border-radius:8px;width:calc(100% - 20px);">
+            <input type="text" id="newBinId" placeholder="Bin ID (e.g. TEST01)" required style="padding:10px;margin:5px;background:#0f172a;border:1px solid #334155;color:white;border-radius:8px;width:calc(100% - 20px);">
             <input type="text" id="newBinLocation" placeholder="Location" required style="padding:10px;margin:5px;background:#0f172a;border:1px solid #334155;color:white;border-radius:8px;width:calc(100% - 20px);">
-            <input type="number" id="newBinLat" placeholder="Latitude (e.g., 24.821434)" step="any" style="padding:10px;margin:5px;background:#0f172a;border:1px solid #334155;color:white;border-radius:8px;width:calc(100% - 20px);">
-            <input type="number" id="newBinLng" placeholder="Longitude (e.g., 86.912637)" step="any" style="padding:10px;margin:5px;background:#0f172a;border:1px solid #334155;color:white;border-radius:8px;width:calc(100% - 20px);">
+            <input type="number" id="newBinLat" placeholder="Latitude (e.g. 24.821434)" step="any" style="padding:10px;margin:5px;background:#0f172a;border:1px solid #334155;color:white;border-radius:8px;width:calc(100% - 20px);">
+            <input type="number" id="newBinLng" placeholder="Longitude (e.g. 86.912637)" step="any" style="padding:10px;margin:5px;background:#0f172a;border:1px solid #334155;color:white;border-radius:8px;width:calc(100% - 20px);">
             <button type="submit" class="btn" style="width:100%;margin-top:10px;">➕ Add Bin</button>
           </form>
-          <div class="success-msg" id="addSuccess">✅ Bin added successfully!</div>
+          <div class="success-msg" id="addSuccess">✅ Bin added permanently!</div>
         </div>
-        <div class="panel">
-          <h3>🗑️ Manage Bins</h3>
-          <table><thead><tr><th>ID</th><th>Location</th><th>Remove</th></tr></thead><tbody id="adminBinsTable"></tbody></table>
-        </div>
+        <div class="panel"><h3>🗑️ Manage Bins</h3><table><thead><tr><th>ID</th><th>Location</th><th>Remove</th></tr></thead><tbody id="adminBinsTable"></tbody></table></div>
       </div>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ========== CONFIGURATION ==========
-    const API_BASE = "https://backend-eslw.onrender.com";   // Your Render server
+    const API_BASE = "https://backend-eslw.onrender.com";
 
     // ========== AUTH ==========
     function login() {
@@ -144,24 +116,28 @@
 
     // ========== STATE ==========
     let dustbins=[], map, markers={}, fillChart, wasteTypeChart;
-    
-    // Local bins stored in localStorage (survive refresh & server overwrite)
     let localBins = JSON.parse(localStorage.getItem('localDustbins') || '[]');
 
-    // ========== DATA FETCH & MERGE ==========
+    // ========== DATA FETCH (FIXED) ==========
     async function fetchBins() {
       try {
-        const r = await fetch(API_BASE+'/api/bins');
-        if (!r.ok) throw new Error('HTTP '+r.status);
+        const r = await fetch(API_BASE + '/api/bins');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
         const serverBins = await r.json();
-        // Merge: server bins first, then local bins (same ID → local wins)
-        const merged = new Map();
-        serverBins.forEach(b => merged.set(b.id, b));
-        localBins.forEach(b => merged.set(b.id, b));
-        dustbins = Array.from(merged.values());
-        console.log('Bins merged (server + local):', dustbins);
-      } catch(e) {
-        console.warn('Server fetch failed, using local bins');
+        console.log('Server bins:', serverBins);
+        console.log('Local bins:', localBins);
+
+        // Start with server bins
+        dustbins = [...serverBins];
+        // Add any local bin that doesn't exist in server list
+        localBins.forEach(lb => {
+          if (!dustbins.some(sb => sb.id === lb.id)) {
+            dustbins.push(lb);
+          }
+        });
+        console.log('Final bins (server + local):', dustbins);
+      } catch (e) {
+        console.warn('Server unreachable, using local bins only');
         dustbins = [...localBins];
       }
       updateAll();
@@ -207,17 +183,15 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap'}).addTo(map);
       dustbins.forEach(b=>addMarker(b));
     }
-
     function addMarker(b) {
       if(!map)return;
       const lat=parseFloat(b.lat), lng=parseFloat(b.lng);
-      if(isNaN(lat)||isNaN(lng))return console.warn('Invalid coords',b);
+      if(isNaN(lat)||isNaN(lng))return;
       let color=b.status==='full'?'red':b.status==='medium'?'orange':'green';
       let m=L.circleMarker([lat,lng],{radius:10,fillColor:color,color:'#fff',weight:2}).addTo(map);
       m.bindPopup(`<b>${b.id}</b><br>${b.location}<br>Fill: ${b.fill}%`);
       markers[b.id]=m;
     }
-
     function updateMapMarkers() {
       if(!map)return;
       dustbins.forEach(b=>{
@@ -234,7 +208,6 @@
       let wet=dustbins.filter(b=>b.wet).length,dry=dustbins.length-wet;
       wasteTypeChart=new Chart(ctx2,{type:'doughnut',data:{labels:['Wet','Dry'],datasets:[{data:[wet,dry],backgroundColor:['#3b82f6','#f59e0b']}]}});
     }
-
     function updateCharts() {
       if(!fillChart||!wasteTypeChart)return;
       fillChart.data.datasets[0].data=dustbins.map(b=>b.fill);
@@ -253,18 +226,17 @@
       } catch(e){alert('Control failed: '+e.message);}
     }
 
-    // ========== ADD BIN (PERMANENT, LOCAL) ==========
+    // ========== ADD BIN (PERMANENT) ==========
     function addBinLocally(bin) {
       localBins.push(bin);
-      localStorage.setItem('localDustbins', JSON.stringify(localBins));  // persist
-      // Also push to dustbins so UI updates immediately
+      localStorage.setItem('localDustbins', JSON.stringify(localBins));
+      // Immediately add to current list and UI
       dustbins.push(bin);
       addMarker(bin);
       updateAll();
       renderAdminTable();
     }
 
-    // Add bin form handler
     document.getElementById('addBinForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const id = document.getElementById('newBinId').value.trim();
@@ -322,7 +294,6 @@
       if(s==='analytics') updateCharts();
     }
 
-    // ========== INIT ==========
     function initDashboard() {
       fetchBins();
       setInterval(fetchBins, 3000);
